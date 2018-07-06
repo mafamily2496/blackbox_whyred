@@ -1,39 +1,17 @@
-if [ "$1" = "clang" ]; then
-    echo "Building kernel with clang toolchain"
-else
-    echo "Building kernel with GCC toolchain"
-fi
-DEFCONFIG=whyred-perf_defconfig
-OBJ_DIR=`pwd`/.obj
-ANYKERNEL_DIR=${HOME}/ak
-TOOLCHAIN=${HOME}/tc/aarch64-linux-android-4.9/bin/aarch64-linux-androidkernel-
-CLANG_PATH=${HOME}/tc/clang-stable/bin/clang
-CLANG_TRIPLE=aarch64-linux-gnu-
-WEB_SERVER_ROOT=/var/www/html
-DATE=$(date +"%m-%d-%y")
-
-if [ "$1" = "clang" ]; then
-    MAKE_OPTS="ARCH=arm64 O=$OBJ_DIR CC=${CLANG_PATH} CLANG_TRIPLE=${CLANG_TRIPLE} CROSS_COMPILE=${TOOLCHAIN}"
-else
-    MAKE_OPTS="ARCH=arm64 O=$OBJ_DIR CROSS_COMPILE=${TOOLCHAIN}"
-fi
-
-if [ ! -d ${OBJ_DIR} ]; then
-    mkdir ${OBJ_DIR}
-fi
-
-make ARCH=arm64 O=$OBJ_DIR CROSS_COMPILE=${TOOLCHAIN} $DEFCONFIG
-make -j$(grep -c ^processor /proc/cpuinfo) ${MAKE_OPTS}
-
-rm -f ${ANYKERNEL_DIR}/Image.gz*
-rm -f ${ANYKERNEL_DIR}/zImage*
-rm -f ${ANYKERNEL_DIR}/dtb*
-cp $OBJ_DIR/arch/arm64/boot/Image.gz-dtb ${ANYKERNEL_DIR}/zImage-dtb
-rm -rf ${ANYKERNEL_DIR}/modules/system/vendor/lib/modules
-mkdir -p ${ANYKERNEL_DIR}/modules/system/vendor/lib/modules
-cp $OBJ_DIR/drivers/staging/qcacld-3.0/wlan.ko ${ANYKERNEL_DIR}/modules/system/vendor/lib/modules/qca_cld3_wlan.ko
-cp $OBJ_DIR/fs/exfat/exfat.ko ${ANYKERNEL_DIR}/modules/system/vendor/lib/modules/exfat.ko
-cd ${ANYKERNEL_DIR}
-rm *.zip
-zip -r9 ZeurionX-$DATE.zip * -x README ZeurionX-$DATE.zip
-cp Z* ${WEB_SERVER_ROOT}
+export CCACHE=ccache
+export DEFCONFIG=whyred-perf_defconfig
+export ARCH=arm64
+export CROSS_COMPILE=/home/majiaming/gcc-linaro-5.5.0-2017.10-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
+export OUTDIR=/home/majiaming/blackbox_whyred-blackbox-wifi/out
+#make mrproper O=$OUTDIR
+make -j4 $DEFCONFIG O=$OUTDIR
+make -j4 O=$OUTDIR
+for i in `find -name *.ko`; do cp $i ../anykernel/modules/; done
+#./dtbToolCM -s 2048 -d "qcom,msm-id = <" -2 -o arch/arm/boot/dt.img -p /usr/bin/ arch/arm/boot/
+cp $OUTDIR/arch/arm64/boot/Image.gz-dtb ../anykernel/zImage
+#find $objdir -name '*.ko' -exec cp -av {} ../anykernel/modules/ \;
+#cd ~/anykernel/AnyKernel2
+#DATE=$(date +"%m-%d-%y")
+#rm *.zip
+#zip -r9 ZeurionX-$DATE.zip * -x README ZeurionX-$DATE.zip
+#cp Z* public_html/
