@@ -1,8 +1,8 @@
 export CCACHE=ccache
 export DEFCONFIG=whyred-perf_defconfig
 export ARCH=arm64
-export CROSS_COMPILE=/home/majiaming/gcc-linaro-5.5.0-2017.10-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
-export OUTDIR=/home/majiaming/blackbox_whyred-blackbox-wifi/out
+export CROSS_COMPILE=/run/media/majiaming/hdd1/gcc-linaro-5.5.0-2017.10-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
+export OUTDIR=/run/media/majiaming/hdd1/blackbox_whyred
 #make mrproper O=$OUTDIR
 make -j4 $DEFCONFIG O=$OUTDIR
 make -j4 O=$OUTDIR
